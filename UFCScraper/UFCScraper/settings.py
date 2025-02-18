@@ -12,6 +12,9 @@ BOT_NAME = "UFCScraper"
 SPIDER_MODULES = ["UFCScraper.spiders"]
 NEWSPIDER_MODULE = "UFCScraper.spiders"
 
+# LOG_ENABLED = True  
+# LOG_FILE = 'spider.log'
+# LOG_LEVEL= 'DEBUG'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:134.0) Gecko/20100101 Firefox/134.0"
