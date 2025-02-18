@@ -9,6 +9,9 @@ class FightersSpider(scrapy.Spider):
     allowed_domains = ["www.ufc.com"]
     start_urls = ["https://www.ufc.com/sitemap.xml"]
 
+    def clean_text(self, text) -> str:
+        return text.replace("\n", "").strip()
+
     def parse(self, response):
         selector = Selector(text=response.text)
 
@@ -45,40 +48,44 @@ class FightersSpider(scrapy.Spider):
     def parse_events(self, response):
         selector = Selector(text=response.text)
 
-        name_prefix = selector.xpath("//h1/text()").get().replace("\n", "").strip()
+        try:
+            name_prefix = self.clean_text(selector.xpath("//h1/text()").get())
+        except:
+            name_prefix = ""
 
-        name_suffix1 = (
-            selector.xpath("//span[@class='e-divider__top']/text()")
-            .get()
-            .replace("\n", "")
-            .strip()
-        )
-        name_suffix2 = (
-            selector.xpath("//span[@class='e-divider__bottom']/text()")
-            .get()
-            .replace("\n", "")
-            .strip()
-        )
+        try:
+            name_suffix1 = self.clean_text(
+                selector.xpath("//span[@class='e-divider__top']/text()").get()
+            )
+        except:
+            name_suffix1 = ""
+
+        try:
+            name_suffix2 = self.clean_text(
+                selector.xpath("//span[@class='e-divider__bottom']/text()").get()
+            )
+        except:
+            name_suffix2 = ""
 
         name_complete = name_prefix + " " + name_suffix1 + " vs " + name_suffix2
 
-        location = (
-            selector.xpath(
-                "//div[@class='field field--name-venue field--type-entity-reference field--label-hidden field__item']/text()"
+        try:
+            location = self.clean_text(
+                selector.xpath(
+                    "//div[@class='field field--name-venue field--type-entity-reference field--label-hidden field__item']/text()"
+                ).get()
             )
-            .get()
-            .replace("\n", "")
-            .strip()
-        )
+        except:
+            location = ""
 
-        date_raw = (
-            selector.xpath(
-                "//div[@class='c-hero__headline-suffix tz-change-inner']/text()"
+        try:
+            date_raw = self.clean_text(
+                selector.xpath(
+                    "//div[@class='c-hero__headline-suffix tz-change-inner']/text()"
+                ).get()
             )
-            .get()
-            .replace("\n", "")
-            .strip()
-        )
+        except:
+            date_raw = ""
 
         yield {
             "name": name_complete,
