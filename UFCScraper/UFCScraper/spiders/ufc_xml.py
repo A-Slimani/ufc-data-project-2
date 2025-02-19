@@ -23,6 +23,7 @@ class FightersSpider(scrapy.Spider):
         # for url in urls:
         #     yield response.follow(url=url, callback=self.parse_urls)
 
+        # USE ONLY FOR TESTING
         yield response.follow(url=urls[0], callback=self.parse_urls)   
 
     def parse_urls(self, response):
@@ -34,12 +35,12 @@ class FightersSpider(scrapy.Spider):
 
         for url in urls:
             if "/athlete/" in url:
-                yield response.follow(url=url, callback=self.parse_athletes, meta={"url": url})
+                yield response.follow(url=url, callback=self.parse_athletes)
 
             ## UNCOMMENT ONCE DONE TESTING
             # if "/event/" in url:
             #     yield response.follow(
-            #         url=url, callback=self.parse_events, meta={"url": url}
+            #         url=url, callback=self.parse_events
             #     )
 
     def parse_athletes(self, response):
@@ -61,7 +62,21 @@ class FightersSpider(scrapy.Spider):
                 bio_text = bio.xpath("div[@class='c-bio__text']/div/text()").get()
             paired_bio.append((bio_label, bio_text))
                 
-        # paired_bio = zip(bio_label, bio_text)
+        hometown = None 
+        try:
+            hometown = selector.xpath("//div[@class='c-bio__row--1col']/div/div[@class='c-bio__text']/text()").getall()[1]
+        except:
+            print(f"Missing hometown data for: {name}")
+
+        row_2col = [] 
+        try:
+            row_2col = selector.xpath("//div[@class='c-bio__row--2col']/div/div[@class='c-bio__text']/text()").getall()
+            if len(row_2col) == 1:
+                row_2col.append(None)
+            elif len(row_2col) == 0:
+                row_2col = [None, None]
+        except:
+            print(f"Missing trains_at and or fighting_style data for: {name}")
 
         yield {
             "name": name, 
@@ -69,8 +84,10 @@ class FightersSpider(scrapy.Spider):
             "record_raw": record_raw,
             "weight_class": weight_class_cleaned,
             "bio": dict(paired_bio),
-            "url": response.meta["url"],
-            "url2": response.url
+            "hometown": hometown,
+            "trains_at": row_2col[0],
+            "fighting_style": row_2col[1],
+            "url": response.url
         }
 
     def parse_events(self, response):
@@ -122,5 +139,5 @@ class FightersSpider(scrapy.Spider):
             "name": name_complete,
             "location_raw": location,
             "date_raw": date_raw,
-            "url": response.meta["url"],
+            "url": response.url,
         }
