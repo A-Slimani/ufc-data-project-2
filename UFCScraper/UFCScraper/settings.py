@@ -65,9 +65,10 @@ CONCURRENT_REQUESTS = 32
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    "UFCScraper.pipelines.UfcscraperPipeline": 300,
-#}
+ITEM_PIPELINES = {
+    "UFCScraper.pipelines.EventPipeline": 300,
+    "UFCScraper.pipelines.FighterPipeline": 400,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
