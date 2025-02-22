@@ -1,11 +1,11 @@
 from scrapy.selector.unified import Selector
 from scrapy.exceptions import CloseSpider
-from UFCScraper.items import EventItem, FighterItem
-from UFCScraper.pipelines import EventPipeline, FighterPipeline
+from UFCScraper.items import EventItem, FighterItem, FightItem
+from UFCScraper.pipelines import EventPipeline, FighterPipeline, FightPipeline
 import scrapy
 
 
-class FightersSpider(scrapy.Spider):
+class UFCSpider(scrapy.Spider):
     name = "initial_build"
     allowed_domains = ["www.ufc.com"]
     start_urls = ["https://www.ufc.com/sitemap.xml"]
@@ -23,16 +23,17 @@ class FightersSpider(scrapy.Spider):
         selector = Selector(text=response.text)
 
         urls = selector.xpath("//sitemap/loc/text()").extract()
+        # unsure if I need this 
         if urls == []:
             raise CloseSpider("No more pages to scrape")
 
         ## UNCOMMENT ONCE DONE TESTING
-        # for url in urls:
-        #     yield response.follow(url=url, callback=self.parse_urls)
+        for url in urls:
+            yield response.follow(url=url, callback=self.parse_urls)
 
         # USE ONLY FOR TESTING
-        for x in range(2):
-            yield response.follow(url=urls[x], callback=self.parse_urls)
+        # for x in range(2):
+        #     yield response.follow(url=urls[x], callback=self.parse_urls)
 
     def parse_urls(self, response):
         selector = Selector(text=response.text)
@@ -43,8 +44,8 @@ class FightersSpider(scrapy.Spider):
 
         for url in urls:
             ## UNCOMMENT ONCE DONE TESTING
-            # if "/athlete/" in url:
-            #     yield response.follow(url=url, callback=self.parse_athletes)
+            if "/athlete/" in url:
+                yield response.follow(url=url, callback=self.parse_athletes)
 
             ## UNCOMMENT ONCE DONE TESTING
             if "/event/" in url:
@@ -198,27 +199,3 @@ class FightersSpider(scrapy.Spider):
         event["url"] = response.url
 
         yield EventPipeline().process_item(event, "")
-
-        ## FIGHTS
-        fights = selector.xpath("//div[@class='c-listing-fight__content']")
-        for fight in fights:
-            # check if name is in span "tag" or "a" tag
-            r_fighter = " ".join(fight.xpath(
-                ".//div[@class='c-listing-fight__corner-name c-listing-fight__corner-name--red']/a/span/text()"
-            ).getall())
-            if r_fighter == "":
-                r_fighter = fight.xpath(".//div[@class='c-listing-fight__corner-name c-listing-fight__corner-name--red']/a/text()").get()
-            l_fighter = " ".join(fight.xpath(
-                ".//div[@class='c-listing-fight__corner-name c-listing-fight__corner-name--blue']/a/span/text()"
-            ).getall())
-            if l_fighter == "":
-                l_fighter = fight.xpath(".//div[@class='c-listing-fight__corner-name c-listing-fight__corner-name--blue']/a/text()").get()
-
-        x = {
-            "r_fighter": r_fighter,
-            "l_fighter": l_fighter,
-        }
-        print(x)
-
-    # def parse_fights(self, response):
-    #     selector = Selector(text = response.text)
