@@ -147,55 +147,56 @@ class UFCSpider(scrapy.Spider):
 
         yield FighterPipeline().process_item(fighter, "")
 
-    def parse_events(self, response):
-        selector = Selector(text=response.text)
+    # def parse_events(self, response):
+    #     selector = Selector(text=response.text)
 
-        try:
-            name_prefix = self.clean_text(selector.xpath("//h1/text()").get())
-        except:
-            name_prefix = ""
+    #     try:
+    #         name_prefix = self.clean_text(selector.xpath("//h1/text()").get())
+    #     except:
+    #         name_prefix = ""
 
-        try:
-            name_suffix1 = self.clean_text(
-                selector.xpath("//span[@class='e-divider__top']/text()").get()
-            )
-        except:
-            name_suffix1 = ""
+    #     try:
+    #         name_suffix1 = self.clean_text(
+    #             selector.xpath("//span[@class='e-divider__top']/text()").get()
+    #         )
+    #     except:
+    #         name_suffix1 = ""
 
-        try:
-            name_suffix2 = self.clean_text(
-                selector.xpath("//span[@class='e-divider__bottom']/text()").get()
-            )
-        except:
-            name_suffix2 = ""
+    #     try:
+    #         name_suffix2 = self.clean_text(
+    #             selector.xpath("//span[@class='e-divider__bottom']/text()").get()
+    #         )
+    #     except:
+    #         name_suffix2 = ""
 
-        if name_suffix1 == "" or name_suffix2 == "":
-            name_complete = name_prefix
-        else:
-            name_complete = name_prefix + " " + name_suffix1 + " vs " + name_suffix2
+    #     if name_suffix1 == "" or name_suffix2 == "":
+    #         name_complete = name_prefix
+    #     else:
+    #         name_complete = name_prefix + ": " + name_suffix1 + " vs " + name_suffix2
 
-        try:
-            location_raw = self.clean_text(
-                selector.xpath(
-                    "//div[@class='field field--name-venue field--type-entity-reference field--label-hidden field__item']/text()"
-                ).get()
-            )
-        except:
-            location_raw = ""
+    #     try:
+    #         location_raw = self.clean_text(
+    #             selector.xpath(
+    #                 "//div[@class='field field--name-venue field--type-entity-reference field--label-hidden field__item']/text()"
+    #             ).get()
+    #         )
+    #     except:
+    #         location_raw = ""
 
-        try:
-            date_raw = self.clean_text(
-                selector.xpath(
-                    "//div[@class='c-hero__headline-suffix tz-change-inner']/text()"
-                ).get()
-            )
-        except:
-            date_raw = ""
+    #     try:
+    #         date_raw = self.clean_text(
+    #             selector.xpath(
+    #                 "//div[@class='c-hero__headline-suffix tz-change-inner']/text()"
+    #             ).get()
+    #         )
+    #     except:
+    #         date_raw = ""
 
-        event = EventItem()
-        event["name"] = name_complete
-        event["location_raw"] = location_raw
-        event["date_raw"] = date_raw
-        event["url"] = response.url
+    #     event = EventItem()
+    #     event["name"] = name_complete
+    #     # event["location_raw"] = location_raw
+    #     # event["date_raw"] = date_raw
+    #     event["url"] = response.url
+    #     event["from_api"] = False
 
-        yield EventPipeline().process_item(event, "")
+    #     yield EventPipeline().process_item(event, "")
