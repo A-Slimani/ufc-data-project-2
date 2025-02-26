@@ -10,6 +10,16 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    
+  scrapy:
+    build:
+      context: .
+      dockerfile: Dockerfiles/scrapy.Dockerfile
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+    
   
 volumes:
   db_data:

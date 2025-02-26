@@ -4,7 +4,7 @@ import scrapy
 
 
 class FighterItem(scrapy.Item):
-    id = scrapy.Field()
+    id = scrapy.Field(input_processor=MapCompose(int))
     first_name = scrapy.Field()
     last_name = scrapy.Field()
     nickname = scrapy.Field()
@@ -29,7 +29,7 @@ class FighterItem(scrapy.Item):
 
 
 class EventItem(scrapy.Item):
-    id = scrapy.Field()
+    id = scrapy.Field(input_processor=MapCompose(int))
     name = scrapy.Field()
     date = scrapy.Field()
     city = scrapy.Field()
@@ -40,14 +40,15 @@ class EventItem(scrapy.Item):
 
 class FightItem(scrapy.Item):
     id = scrapy.Field(input_processor=MapCompose(int))
-    event_id = scrapy.Field()
-    r_fighter_id = scrapy.Field()
-    b_fighter_id = scrapy.Field()
+    event_id = scrapy.Field(input_processor=MapCompose(int))
+    r_fighter_id = scrapy.Field(input_processor=MapCompose(int))
+    b_fighter_id = scrapy.Field(input_processor=MapCompose(int))
     r_fighter_status = scrapy.Field()   
     b_fighter_status = scrapy.Field()   
-    round = scrapy.Field()
+    round = scrapy.Field(input_processor=MapCompose(int))
     time = scrapy.Field() 
     method = scrapy.Field()
     bout_weight = scrapy.Field()
+    url = scrapy.Field()
     fight_stats = scrapy.Field()
 

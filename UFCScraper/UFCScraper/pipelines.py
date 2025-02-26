@@ -1,4 +1,6 @@
-from UFCScraper.items import EventItem, FighterItem, FightItem
+from UFCScraper.items import FighterItem, FightItem
+from psycopg2.errors import ForeignKeyViolation
+from psycopg2.extras import Json
 from dotenv import load_dotenv
 import psycopg2
 import os
@@ -248,62 +250,73 @@ class FightPipeline:
         if isinstance(item, FightItem):
             conn = psycopg2.connect(os.getenv("DB_URI"))
             cursor = conn.cursor()
-            insert_query = """
-                INSERT INTO fights
-                (
-                    id,
-                    event_id, 
-                    r_fighter_id,
-                    b_fighter_id,
-                    r_fighter_status,
-                    b_fighter_status,
-                    round,
-                    time,
-                    method,
-                    bout_weight,
-                    fight_stats,
-                    last_updated_at
-                ) VALUES (
-                    %s, %s, %s, %s, %s, 
-                    %s, %s, %s, %s, %s, 
-                    CURRENT_TIMESTAMP
-                ) 
-                ON CONFLICT (id) DO UPDATE SET
-                    id = EXCLUDED.id,
-                    event_id = EXCLUDED.event_id,
-                    r_fighter_id = EXCLUDED.r_fighter_id,
-                    b_fighter_id = EXCLUDED.b_fighter_id,
-                    r_fighter_status = EXCLUDED.r_fighter_status,
-                    b_fighter_status = EXCLUDED.b_fighter_status,
-                    round = EXCLUDED.round,
-                    time = EXCLUDED.time,
-                    method = EXCLUDED.method,
-                    bout_weight = EXCLUDED.bout_weight,
-                    fight_stats = EXCLUDED.fight_stats,
-                    last_updated_at = CURRENT_TIMESTAMP
-            """
-            cursor.execute(
-                insert_query,
-                (
-                    item["id"],
-                    item["event_id"],
-                    item["r_fighter"],
-                    item["b_fighter"],
-                    item["r_fighter_status"],
-                    item["b_fighter_status"],
-                    item["round"],
-                    item["time"],
-                    item["method"],
-                    item["bout_weight"],
-                    item["fight_stats"],
-                ),
-            )
-            conn.commit()
+            try:
+                insert_query = """
+                    INSERT INTO fights
+                    (
+                        id,
+                        event_id, 
+                        r_fighter_id,
+                        b_fighter_id,
+                        r_fighter_status,
+                        b_fighter_status,
+                        round,
+                        time,
+                        method,
+                        bout_weight,
+                        url,
+                        fight_stats,
+                        last_updated_at
+                    ) VALUES (
+                        %s, %s, %s, %s, %s, 
+                        %s, %s, %s, %s, %s, 
+                        %s, %s,
+                        CURRENT_TIMESTAMP
+                    ) 
+                    ON CONFLICT (id) DO UPDATE SET
+                        id = EXCLUDED.id,
+                        event_id = EXCLUDED.event_id,
+                        r_fighter_id = EXCLUDED.r_fighter_id,
+                        b_fighter_id = EXCLUDED.b_fighter_id,
+                        r_fighter_status = EXCLUDED.r_fighter_status,
+                        b_fighter_status = EXCLUDED.b_fighter_status,
+                        round = EXCLUDED.round,
+                        time = EXCLUDED.time,
+                        method = EXCLUDED.method,
+                        bout_weight = EXCLUDED.bout_weight,
+                        url = EXCLUDED.url,
+                        fight_stats = EXCLUDED.fight_stats,
+                        last_updated_at = CURRENT_TIMESTAMP
+                """
+                cursor.execute(
+                    insert_query,
+                    (
+                        item["id"],
+                        item["event_id"],
+                        item["r_fighter_id"],
+                        item["b_fighter_id"],
+                        item["r_fighter_status"],
+                        item["b_fighter_status"],
+                        item["round"],
+                        item["time"],
+                        item["method"],
+                        item["bout_weight"],
+                        item["url"],
+                        Json(item["fight_stats"]),
+                    ),
+                )
+                conn.commit()
 
-            if cursor.rowcount > 0:
-                print(f"Insert successful. {cursor.rowcount} row(s) affected.")
-            else:
-                print("Insert did not affect any rows.")
+                if cursor.rowcount > 0:
+                    print(f"Insert successful. {cursor.rowcount} row(s) affected.")
+                else:
+                    print("Insert did not affect any rows.")
+
+            except ForeignKeyViolation as e:
+                with open('error_list_fights.log', 'a') as file:
+                    file.write(f"{item['id']} :: {str(e.diag.message_detail)} \n")
+
+
 
             conn.close()
             return item
