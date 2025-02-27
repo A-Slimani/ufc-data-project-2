@@ -156,12 +156,13 @@ class FighterPipeline:
                     trains_at_country, 
                     stance, 
                     url, 
+                    weight_class,
                     last_updated_at
                 ) VALUES (
                     %s, %s, %s, %s, %s, 
                     %s, %s, %s, %s, %s, 
                     %s, %s, %s, %s, %s, 
-                    %s, %s, %s, 
+                    %s, %s, %s, %s,
                     CURRENT_TIMESTAMP
                 ) 
                 ON CONFLICT (id) DO UPDATE SET
@@ -181,6 +182,7 @@ class FighterPipeline:
                     trains_at_country = EXCLUDED.trains_at_country, 
                     stance = EXCLUDED.stance, 
                     url = EXCLUDED.url, 
+                    weight_class = EXCLUDED.weight_class,
                     last_updated_at = CURRENT_TIMESTAMP
             """
             cursor.execute(
@@ -204,6 +206,7 @@ class FighterPipeline:
                     item["trains_at_state"],
                     item["stance"],
                     item["url"],
+                    item["weight_class"],
                 ),
             )
             conn.commit()

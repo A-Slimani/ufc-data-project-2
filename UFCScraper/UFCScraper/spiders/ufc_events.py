@@ -7,9 +7,9 @@ import json
 class EventsApiSpider(scrapy.Spider):
     name = "ufc_events"
     allowed_domains = ["d29dxerjsp82wz.cloudfront.net"]   
-    start_page = 0 
-    max_pages = 13000
-    start_urls = [f"https://d29dxerjsp82wz.cloudfront.net/api/v3/event/live/{page_number}.json"]
+    start_page = 1 
+    max_pages = 12000
+    start_urls = [f"https://d29dxerjsp82wz.cloudfront.net/api/v3/event/live/{start_page}.json"]
 
     handle_httpstatus_list = [502]
 
@@ -18,10 +18,12 @@ class EventsApiSpider(scrapy.Spider):
     with open('missing_event_data.txt', 'w') as file:
         file.write("::: Missing event data pages :::\n")
     
+
     def parse(self, response):
         for page_no in range(self.start_page, self.max_pages):
             url = f"https://d29dxerjsp82wz.cloudfront.net/api/v3/event/live/{page_no}.json"
             yield response.follow(url, callback=self.parse_events, meta={"page_no": page_no})
+
 
     def parse_events(self, response):
         data = json.loads(response.body)

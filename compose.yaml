@@ -19,7 +19,45 @@ services:
       - db
     volumes:
       - .:/app
+  
+  airflow-db:
+    image: postgres:17.3
+    environment:
+      POSTGRES_USER: aboud
+      POSTGRES_PASSWORD: ufc123
+      POSTGRES_DB: airflow
+    volumes:
+      - airflow_db_data:/var/lib/postgresql/data
+    restart: always
+  
+  init-airflow:
+    image: apache/airflow:2.1.2
+    depends_on: airflow-db
+    environment:
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://aboud:ufc123@airflow-db/airflow
+    command: >
+      bash -c "airflow db init && airflow users create --username admin --password admin --firstname admin --lastname admin --role Admin --email
     
+  airflow-webserver:
+    build:
+      context: .
+      dockerfile: Dockerfiles/airflow-webserver.Dockerfile
+    user: root
+    depends_on:
+      - airflow-db 
+      - db
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://aboud:ufc123@airflow-db/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'False'
+      AIRFLOW__WEBSERVER__SECRET_KEY: 'my_secret'
+    restart: always
+    command: airflow scheduler
   
 volumes:
   db_data:
+  airflow_db_data:

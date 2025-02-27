@@ -6,7 +6,7 @@ class FightsApiSpider(scrapy.Spider):
     name = "ufc_fights"
     allowed_domains = ["d29dxerjsp82wz.cloudfront.net"]
     start_page = 30 
-    max_pages = 12000 
+    max_pages = 11500 
     err_page_list = []
     start_urls = [f"https://d29dxerjsp82wz.cloudfront.net/api/v3/fight/live/{start_page}.json"]
 
@@ -17,6 +17,7 @@ class FightsApiSpider(scrapy.Spider):
     with open('missing_fight_data.txt', 'w') as file:
         file.write("::: Missing event data pages :::\n")
     
+
     def parse(self, response):
         for page_no in range(self.start_page, self.max_pages):
             url = f"https://d29dxerjsp82wz.cloudfront.net/api/v3/fight/live/{page_no}.json"
