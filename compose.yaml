@@ -32,7 +32,8 @@ services:
   
   init-airflow:
     image: apache/airflow:2.1.2
-    depends_on: airflow-db
+    depends_on: 
+      - airflow-db
     environment:
       AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://aboud:ufc123@airflow-db/airflow
     command: >
