@@ -42,6 +42,7 @@ class FightsApiSpider(scrapy.Spider):
             fight_item['bout_weight'] = fight['WeightClass']['Description']
             fight_item['url'] = response.url
             fight_item['fight_stats'] = fight['FightStats']
+
             yield fight_item
         
         except KeyError as e:

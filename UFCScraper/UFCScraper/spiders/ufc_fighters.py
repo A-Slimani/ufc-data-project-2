@@ -6,9 +6,10 @@ import json
 class EventsApiSpider(scrapy.Spider):
     name = "ufc_fighters"
     allowed_domains = ["d29dxerjsp82wz.cloudfront.net"]   
-    page_number = 1 
+    start_page = 1 
+    max_pages = 13000
     err_count = 0 
-    start_urls = [f"https://d29dxerjsp82wz.cloudfront.net/api/v3/event/live/{page_number}.json"]
+    start_urls = [f"https://d29dxerjsp82wz.cloudfront.net/api/v3/event/live/{start_page}.json"]
 
     handle_httpstatus_list = [502]
 
@@ -16,8 +17,14 @@ class EventsApiSpider(scrapy.Spider):
 
     with open('missing_event_data.txt', 'w') as file:
         file.write("::: Missing event data pages :::\n")
-
+    
     def parse(self, response):
+        for page_no in range(self.start_page, self.max_pages):
+            url = f"https://d29dxerjsp82wz.cloudfront.net/api/v3/event/live/{page_no}.json"
+            yield response.follow(url, callback=self.parse_fighters, meta={"page_no": page_no})
+        
+
+    def parse_fighters(self, response):
         data = json.loads(response.body)
         try:
             self.error_count = 0
@@ -48,16 +55,10 @@ class EventsApiSpider(scrapy.Spider):
 
                     yield fighter_item 
 
-        except KeyError:
-            with open('missing_event_data.txt', 'a') as file:
-                file.write(f"{self.page_number}\n")
-            self.err_count += 1
+        except KeyError as e:
+            with open('error_list_fighters.log', 'a') as file:
+                file.write(f"{response.meta['page_no']} :: KeyError:{str(e)} \n")
 
-        if self.err_count > 5:
-            raise CloseSpider("End of pages")
-
-
-        self.page_number += 1
-        next_page = f"https://d29dxerjsp82wz.cloudfront.net/api/v3/event/live/{self.page_number}.json"
-        yield response.follow(next_page, callback=self.parse)
-
+        except Exception as e:
+            with open('error_list_fighters.log', 'a') as file:
+                file.write(f"{response.meta['page_no']} :: {str(e)} \n")
