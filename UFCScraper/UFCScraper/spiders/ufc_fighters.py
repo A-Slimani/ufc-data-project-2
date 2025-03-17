@@ -7,7 +7,7 @@ class EventsApiSpider(scrapy.Spider):
     name = "ufc_fighters"
     allowed_domains = ["d29dxerjsp82wz.cloudfront.net"]   
     start_page = 1 
-    max_pages = 12000
+    max_pages = 1300 
     err_count = 0 
     start_urls = [f"https://d29dxerjsp82wz.cloudfront.net/api/v3/event/live/{start_page}.json"]
 

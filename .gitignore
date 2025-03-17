@@ -6,4 +6,6 @@ __pycache__
 snippet.py
 .env
 .scrapy
+.DS_Store
+logs
 missing_*.txt

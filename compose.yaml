@@ -10,16 +10,19 @@ services:
       - "5432:5432"
     volumes:
       - ufc_db_data:/var/lib/postgresql/data
-    
-  scrapy:
+
+  scrapyd:
     build:
       context: .
-      dockerfile: Dockerfiles/scrapy.Dockerfile
-    depends_on:
-      - ufc-db
+      dockerfile: Dockerfiles/scrapyd.Dockerfile
+    container_name: scrapyd
+    ports:
+      - "6800:6800"
     volumes:
-      - .:/app
-  
-  
+      - scrapyd_data:/var/lib/scrapyd
+      - ./scrapyd.conf:/etc/scrapyd/scrapyd.conf
+    
+
 volumes:
   ufc_db_data:
+  scrapyd_data:

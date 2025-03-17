@@ -1,0 +1,11 @@
+setup.py
+UFCScraper/__init__.py
+UFCScraper/items.py
+UFCScraper/middlewares.py
+UFCScraper/pipelines.py
+UFCScraper/settings.py
+project.egg-info/PKG-INFO
+project.egg-info/SOURCES.txt
+project.egg-info/dependency_links.txt
+project.egg-info/entry_points.txt
+project.egg-info/top_level.txt
